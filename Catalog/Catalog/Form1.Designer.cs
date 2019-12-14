@@ -278,6 +278,7 @@
             // 
             // catalog_model_add_button
             // 
+            this.catalog_model_add_button.Enabled = false;
             this.catalog_model_add_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.catalog_model_add_button.Location = new System.Drawing.Point(21, 434);
             this.catalog_model_add_button.Name = "catalog_model_add_button";
@@ -416,6 +417,7 @@
             // 
             // catalog_aggregate_add_button
             // 
+            this.catalog_aggregate_add_button.Enabled = false;
             this.catalog_aggregate_add_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.catalog_aggregate_add_button.Location = new System.Drawing.Point(257, 146);
             this.catalog_aggregate_add_button.Name = "catalog_aggregate_add_button";
@@ -500,6 +502,7 @@
             // 
             // catalog_add_button
             // 
+            this.catalog_add_button.Enabled = false;
             this.catalog_add_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.catalog_add_button.Location = new System.Drawing.Point(18, 146);
             this.catalog_add_button.Name = "catalog_add_button";

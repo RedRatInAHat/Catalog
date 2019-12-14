@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
@@ -24,14 +19,21 @@ namespace Catalog
             StartServer();
         }
 
+        /// <summary>
+        /// Запуск Денвера для связи с базой MySQL
+        /// </summary>
         public void StartServer()
         {
-            //Process.Start(@"C:\WebServers\denwer\Run.exe");
-            //Thread.Sleep(3000);
+            Process.Start(@"C:\WebServers\denwer\Run.exe");
+            Thread.Sleep(3000);
         }
 
+        /// <summary>
+        /// Создание базы данных
+        /// </summary>
         public void CreateDatabase()
         {
+            // если базы данных нет, создаётся она и все необходимые таблицы; иначе выбирается указанная база данных
             try
             {
                 OpenConnection(String.Format("server={0};user={1};password={2};database={3};CharSet=utf8;Convert Zero Datetime=True;",
@@ -50,6 +52,9 @@ namespace Catalog
             }
         }
 
+        /// <summary>
+        /// Создание структуры таблиц
+        /// </summary>
         public void CreateTables()
         {
             ExecuteCommand(string.Format("use {0};", textBox4.Text));
@@ -65,12 +70,27 @@ namespace Catalog
                 "name varchar(50) not null default 'unknown', description varchar(200) not null default 'no description');"));
         }
 
+        /// <summary>
+        /// Получение доступа к кнопкам
+        /// </summary>
+        public void ButtonsEnabled()
+        {
+            catalog_add_button.Enabled = true;
+            catalog_aggregate_add_button.Enabled = true;
+            catalog_model_add_button.Enabled = true;
+        }
+
+        /// <summary>
+        /// Добавление значений в таблицу catalog
+        /// </summary>
         public void AddValuesToCatalog()
         {
+
             bool values_exist = false;
 
             string query = "insert into catalog set ";
 
+            // добавление элементов; если соответствующая форма пуста, значение не добавляется (будет установлено дефолтное)
             if (!String.IsNullOrWhiteSpace(catalog_name_text.Text))
             {
                 query += "name= '" + catalog_name_text.Text + "'";
@@ -90,12 +110,16 @@ namespace Catalog
                 ExecuteCommand("insert into catalog values ();");
         }
 
+        /// <summary>
+        /// Добавление значений в таблицу catalog_aggregate
+        /// </summary>
         public void AddValuesToCatalogAggregate()
         {
             bool values_exist = false;
 
             string query = "insert into catalog_aggregate set ";
 
+            // добавление элементов; если соответствующая форма пуста, значение не добавляется (будет установлено дефолтное)
             if (!String.IsNullOrWhiteSpace(catalog_aggregate_name_text.Text))
             {
                 query += "name= '" + catalog_aggregate_name_text.Text + "'";
@@ -129,12 +153,17 @@ namespace Catalog
                 ExecuteCommand("insert into catalog_aggregate values ();");
         }
 
+        /// <summary>
+        /// Добавление значений в таблицу catalog_model
+        /// </summary>
         public void AddValuesToCatalogModel()
         {
+
             bool values_exist = false;
 
             string query = "insert into catalog_model set ";
 
+            // добавление элементов; если соответствующая форма пуста, значение не добавляется (будет установлено дефолтное)
             if (!String.IsNullOrWhiteSpace(catalog_model_model_text.Text))
             {
                 query += "model= '" + catalog_model_model_text.Text + "'";
@@ -168,30 +197,39 @@ namespace Catalog
                 ExecuteCommand("insert into catalog_model values ();");
         }
 
+        /// <summary>
+        /// Добавление значений в таблицу catalog_level.
+        /// Реализует последовательное добавление: от элементов с наименьшим количеством родителей до элементов с наибольшим
+        /// </summary>
+        /// <param name="categories">Список категорий(таблиц), которые должны быть добавлены в таблицу.</param>
         public void AddValuesToCatalogLevelV1(List<string[]> categories)
         {
             string current_category;
-            int index = 0; // предполагается, что таблица очищается после каждого вызова, поэтому можно брать индекс из программы. В противном случае необходимо вызывать count(*) в самой таблице
-            Dictionary<string, int> indexes = new Dictionary<string, int>();
-            Queue<string> parents_queue = new Queue<string>(GetTopParents(categories));
-            List<string[]> children_data;
-            List<string[]> data;
+            int index = 0; // предполагается, что таблица очищается после каждого вызова, поэтому можно брать индекс из программы. В противном случае необходимо вызывать count(*) из таблицы
+            Dictionary<string, int> indexes = new Dictionary<string, int>(); // Структура "table_name.index" = index для получения соответствия элемента в исходной таблице и индекса в созданной
+            Queue<string> parents_queue = new Queue<string>(GetTopParents(categories)); // начальная очередь состоит из элементов с наименьшим числом родителей
+            List<string[]> children_data; 
+            List<string[]> data; 
             List<string[]> reference_data;
             int parent_id;
             string parent_name;
-            List<string> available_categories = new List<string>();
+            List<string> available_categories = new List<string>(); // список ещё не задействованных таблиц. Введён для предотвращения невозможности добавления элементов, не имеющих указанного в создаваемой таблице родителя и для предотавращения закольцованности (а вдруг)
             foreach (string[] c in categories)
                 available_categories.Add(c[0].ToString());
 
             ClearTable("catalog_level");
 
+            // пока не закончена очередь, каждый элемент заносится в catalog_level с указанием родителя (предполагается только 1 родитель)
             while (parents_queue.Count > 0)
             {
                 current_category = parents_queue.Dequeue();
                 available_categories.Remove(current_category.ToString());
 
+                // поиск родителей
                 reference_data = ExecuteReader(String.Format("select column_name, referenced_table_name, referenced_column_name " +
                         "from information_schema.key_column_usage where table_name = '{0}' and constraint_name like '%_ibfk_%';", current_category), 3);
+
+                // если родителей нет, родитель не указывается. Если родители есть, но они не указаны в таблице, также не указывается родитель. Иначе - указывается согласно индексу, указанному в словаре indexes
                 if (reference_data.Count == 0)
                 {
                     data = ExecuteReader(String.Format("select id, name, description from {0};", current_category), 3);
@@ -235,22 +273,34 @@ namespace Catalog
                     catch { }
                 }
 
+                // получение информации о потомках
                 children_data = ExecuteReader(String.Format("select table_name " +
                         "from information_schema.key_column_usage where referenced_table_name = '{0}' and constraint_name like '%_ibfk_%';", current_category), 1);
 
+                // потомки добавляются в очередь
                 foreach (string[] c in children_data)
                 {
                     if (available_categories.Contains(c[0].ToString()))
                         parents_queue.Enqueue(c[0].ToString());
                 }
 
-                if(parents_queue.Count == 0 && categories.Count != 0)
+                // предотвращение потери данных, имеющих родителей, но не указанных в categories
+                if (parents_queue.Count == 0 && available_categories.Count != 0)
                 {
-                    parents_queue = new Queue<string>(GetTopParents(categories));
+                    List<string[]> crutch = new List<string[]>();
+                    foreach (string a in available_categories)
+                        crutch.Add(new string[] { a });
+                    parents_queue = new Queue<string>(GetTopParents(crutch));
                 }
             }
         }
 
+        /// <summary>
+        /// Добавление значений в таблицу catalog_level.
+        /// Реализует древовидное добавление: сначала добавляются потомки одного элемента, затем другого и т.д.
+        /// Имеет абсолютно ту же структуру, но вместо очереди используется стек.
+        /// </summary>
+        /// <param name="categories"></param>
         public void AddValuesToCatalogLevelV2(List<string[]> categories)
         {
             string current_category;
@@ -338,12 +388,23 @@ namespace Catalog
 
         }
 
+        /// <summary>
+        /// Очистка таблицы.
+        /// Используется для заполнения таблицы с самого начала со сбросом счётчика индексов.
+        /// </summary>
+        /// <param name="table_name">Имя таблицы, для которой будет произведён сброс</param>
         public void ClearTable(string table_name)
         {
             ExecuteCommand(string.Format("delete from {0}", table_name));
             ExecuteCommand(string.Format("ALTER TABLE {0} AUTO_INCREMENT=1", table_name));
         }
 
+        /// <summary>
+        /// Вывод данных в таблицу
+        /// </summary>
+        /// <param name="table_name">Имя таблицы, которая будет выведена.</param>
+        /// <param name="number_of_columns">Число столбцов выводимой таблицы.</param>
+        /// <param name="dataGridView">Элемент, в который будет выведена таблица.</param>
         public void ShowCatalogTable(string table_name, int number_of_columns, DataGridView dataGridView)
         {
             dataGridView.Rows.Clear();
@@ -363,15 +424,21 @@ namespace Catalog
             }
         }
 
+        /// <summary>
+        /// Получение названий таблиц (категорий) с наименьшим числом родителей.
+        /// </summary>
+        /// <param name="categories">Названия таблиц, среди которых проводится поиск.</param>
+        /// <returns>Список элементов с наименьшим числом родителей.</returns>
         public List<string> GetTopParents(List<string[]> categories)
         {
-            List<int> levels = new List<int>();
-            List<string> top_parents = new List<string>();
+            List<int> levels = new List<int>(); //число родительских элементов
+            List<string> top_parents = new List<string>(); //список элементов с наименьшим числом родителей
 
             int minimum_level = Int32.MaxValue;
 
             int number_of_level;
 
+            // поиск количества родительских элементов для каждой из таблиц и определение наименьшего числа родительских уровней среди всех полученных
             foreach (string[] s in categories)
             {
                 number_of_level = 0;
@@ -391,6 +458,7 @@ namespace Catalog
 
             int parent_index;
 
+            // получение элементов с наименьшим числом родителей
             while (levels.Contains(minimum_level))
             {
                 parent_index = levels.IndexOf(minimum_level);
@@ -402,16 +470,23 @@ namespace Catalog
             return top_parents;
         }
 
+        /// <summary>
+        /// Обновление таблицы catalog_level, таблицы, отображаемой на форме, и элемента treeView
+        /// </summary>
         public void UpdateCatalogLevel()
         {
             if (alternative_fulling_check_box.Checked)
-                AddValuesToCatalogLevelV1(new List<string[]>() { new string[] { "catalog" }, new string[] { "catalog_aggregate" }, new string[] { "catalog_model" } });
-            else
                 AddValuesToCatalogLevelV2(new List<string[]>() { new string[] { "catalog" }, new string[] { "catalog_aggregate" }, new string[] { "catalog_model" } });
+            else
+                AddValuesToCatalogLevelV1(new List<string[]>() { new string[] { "catalog" }, new string[] { "catalog_aggregate" }, new string[] { "catalog_model" } });
             ShowCatalogTable("catalog_level", 4, dataGridView4);
             UpdateTreeView();
         }
 
+        /// <summary>
+        /// Обновление элемента treeView.
+        /// Предполагается, что catalog_tree сохраняет иерархичность; родитель элементов, чьи родители не представлены в таблице не указаны.
+        /// </summary>
         public void UpdateTreeView()
         {
             TreeNode string_node;
@@ -421,8 +496,10 @@ namespace Catalog
 
             List<string[]> catalog_level_data = ExecuteReader("select * from catalog_level", 4);
 
+            // для каждого узла ищется родитель согласно id родителя, который указывается в качестве имени узла
             foreach (string[] c in catalog_level_data)
             {
+                // если родитель не указан, узел устанавливается корневымl иначе производится обход всех узлов в поисках родителя и установка текущего элемента в качестве дочернего
                 if (c[1].Count() == 0)
                 {
                     string_node = new TreeNode { Text = c[2], Name = c[0] };
@@ -446,6 +523,14 @@ namespace Catalog
             }
         }
 
+        /// <summary>
+        /// Обход всех дочерних узлов дерева.
+        /// Использует рекурсию для обхода.
+        /// </summary>
+        /// <param name="parent">Родительский узел</param>
+        /// <param name="parent_id">ID родительского элемента</param>
+        /// <param name="text">Устанавливаемое название, отображаемое в treeView</param>
+        /// <param name="name">Имя узла, фактически id элемента</param>
         public void CheckChildNodes(TreeNode parent, string parent_id, string text, string name)
         {
             foreach (TreeNode tn in parent.Nodes)
@@ -457,6 +542,12 @@ namespace Catalog
             }
         }
 
+        /// <summary>
+        /// Обработчик нажатия кнопки.
+        /// Запускает функции создания базы данных, отображения таблиц в форме, обновления данных таблицы catalog_level и элемента treeView
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
             CreateDatabase();
@@ -464,16 +555,32 @@ namespace Catalog
             ShowCatalogTable("catalog_aggregate", 5, dataGridView2);
             ShowCatalogTable("catalog_model", 5, dataGridView3);
             UpdateCatalogLevel();
+            ButtonsEnabled();
         }
 
+        /// <summary>
+        /// Отправка команд MySQL серверу
+        /// </summary>
+        /// <param name="query">Команда, передаваемая MySQL серверу.</param>
         private void ExecuteCommand(string query)
         {
+            string query_ = "SET NAMES utf8";
+            MySqlCommand command_ = new MySqlCommand(query_, connection);
+            command_.ExecuteNonQuery();
+
             MySqlCommand command = new MySqlCommand(query, connection);
             command.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Запрос данных от MySQL сервера.
+        /// </summary>
+        /// <param name="query">Комнада MySQL серверу.</param>
+        /// <param name="number_of_columns">Число принимаемых колонок</param>
+        /// <returns>Список данных от MySQL данных</returns>
         private List<string[]> ExecuteReader(string query, int number_of_columns)
         {
+            ExecuteCommand("SET NAMES cp1251");
             MySqlCommand command = new MySqlCommand(query, connection);
             MySqlDataReader reader = command.ExecuteReader();
 
@@ -493,12 +600,22 @@ namespace Catalog
             return data;
         }
 
+        /// <summary>
+        /// Подключение к MySQL серверу.
+        /// </summary>
+        /// <param name="connection_string">Запрос на подключение.</param>
         private void OpenConnection(string connection_string)
         {
             connection = new MySqlConnection(connection_string);
             connection.Open();
         }
 
+        /// <summary>
+        /// Обработчик нажания кнопки.
+        /// Добавление данных в таблицу catalog и обновление таблицы catalog_level.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void catalog_add_button_Click(object sender, EventArgs e)
         {
             AddValuesToCatalog();
@@ -506,6 +623,12 @@ namespace Catalog
             UpdateCatalogLevel();
         }
 
+        /// <summary>
+        /// Обработчик нажания кнопки.
+        /// Добавление данных в таблицу catalog_aggregate и обновление таблицы catalog_level.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void catalog_aggregate_add_button_Click(object sender, EventArgs e)
         {
             AddValuesToCatalogAggregate();
@@ -513,6 +636,12 @@ namespace Catalog
             UpdateCatalogLevel();
         }
 
+        /// <summary>
+        /// Обработчик нажания кнопки.
+        /// Добавление данных в таблицу catalog и обновление таблицы catalog_level.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void catalog_model_add_button_Click(object sender, EventArgs e)
         {
             AddValuesToCatalogModel();
@@ -520,6 +649,12 @@ namespace Catalog
             UpdateCatalogLevel();
         }
 
+        /// <summary>
+        /// Обработчик нажатия кнопки.
+        /// Была сделана для тестовых функций. Сейчас можно удалить, но программа обижается. TODO
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
             AddValuesToCatalogLevelV1(new List<string[]>() { new string[] { "catalog" }, new string[] { "catalog_aggregate" }, new string[] { "catalog_model" } });
