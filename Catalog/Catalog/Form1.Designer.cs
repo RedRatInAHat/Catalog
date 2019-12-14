@@ -30,6 +30,7 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAdd = new System.Windows.Forms.TabPage();
+            this.alternative_fulling_check_box = new System.Windows.Forms.CheckBox();
             this.dataGridView4 = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.p_id = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -87,21 +88,20 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.tabLoad = new System.Windows.Forms.TabPage();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.alternative_fulling_check_box = new System.Windows.Forms.CheckBox();
+            this.catalog_level_tree = new System.Windows.Forms.TreeView();
             this.tabControl1.SuspendLayout();
             this.tabAdd.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.tabPage1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabAdd);
-            this.tabControl1.Controls.Add(this.tabLoad);
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
@@ -159,6 +159,16 @@
             this.tabAdd.TabIndex = 0;
             this.tabAdd.Text = "Создание БД";
             this.tabAdd.UseVisualStyleBackColor = true;
+            // 
+            // alternative_fulling_check_box
+            // 
+            this.alternative_fulling_check_box.AutoSize = true;
+            this.alternative_fulling_check_box.Location = new System.Drawing.Point(469, 386);
+            this.alternative_fulling_check_box.Name = "alternative_fulling_check_box";
+            this.alternative_fulling_check_box.Size = new System.Drawing.Size(172, 17);
+            this.alternative_fulling_check_box.TabIndex = 39;
+            this.alternative_fulling_check_box.Text = "Альтернативное заполнение";
+            this.alternative_fulling_check_box.UseVisualStyleBackColor = true;
             // 
             // dataGridView4
             // 
@@ -654,35 +664,23 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "server:";
             // 
-            // tabLoad
-            // 
-            this.tabLoad.Location = new System.Drawing.Point(4, 22);
-            this.tabLoad.Name = "tabLoad";
-            this.tabLoad.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLoad.Size = new System.Drawing.Size(696, 668);
-            this.tabLoad.TabIndex = 1;
-            this.tabLoad.Text = "Генерация новой таблицы";
-            this.tabLoad.UseVisualStyleBackColor = true;
-            // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.catalog_level_tree);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(696, 668);
             this.tabPage1.TabIndex = 2;
-            this.tabPage1.Text = "Представление таблицы";
+            this.tabPage1.Text = "Дерево моделей";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // alternative_fulling_check_box
+            // catalog_level_tree
             // 
-            this.alternative_fulling_check_box.AutoSize = true;
-            this.alternative_fulling_check_box.Location = new System.Drawing.Point(469, 386);
-            this.alternative_fulling_check_box.Name = "alternative_fulling_check_box";
-            this.alternative_fulling_check_box.Size = new System.Drawing.Size(172, 17);
-            this.alternative_fulling_check_box.TabIndex = 39;
-            this.alternative_fulling_check_box.Text = "Альтернативное заполнение";
-            this.alternative_fulling_check_box.UseVisualStyleBackColor = true;
+            this.catalog_level_tree.Location = new System.Drawing.Point(6, 3);
+            this.catalog_level_tree.Name = "catalog_level_tree";
+            this.catalog_level_tree.Size = new System.Drawing.Size(219, 659);
+            this.catalog_level_tree.TabIndex = 0;
             // 
             // Form1
             // 
@@ -699,6 +697,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.tabPage1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -707,7 +706,6 @@
 
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabAdd;
-        private System.Windows.Forms.TabPage tabLoad;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.TextBox textBox3;
@@ -767,6 +765,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn11;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.CheckBox alternative_fulling_check_box;
+        private System.Windows.Forms.TreeView catalog_level_tree;
     }
 }
 

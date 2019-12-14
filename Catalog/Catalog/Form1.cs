@@ -183,8 +183,7 @@ namespace Catalog
             foreach (string[] c in categories)
                 available_categories.Add(c[0].ToString());
 
-            ExecuteCommand("delete from catalog_level");
-            ExecuteCommand("ALTER TABLE catalog_level AUTO_INCREMENT=1");
+            ClearTable("catalog_level");
 
             while (parents_queue.Count > 0)
             {
@@ -244,6 +243,11 @@ namespace Catalog
                     if (available_categories.Contains(c[0].ToString()))
                         parents_queue.Enqueue(c[0].ToString());
                 }
+
+                if(parents_queue.Count == 0 && categories.Count != 0)
+                {
+                    parents_queue = new Queue<string>(GetTopParents(categories));
+                }
             }
         }
 
@@ -262,8 +266,7 @@ namespace Catalog
             foreach (string[] c in categories)
                 available_categories.Add(c[0].ToString());
 
-            ExecuteCommand("delete from catalog_level");
-            ExecuteCommand("ALTER TABLE catalog_level AUTO_INCREMENT=1");
+            ClearTable("catalog_level");
 
             while (parents_stack.Count > 0)
             {
@@ -323,8 +326,22 @@ namespace Catalog
                     if (available_categories.Contains(c[0].ToString()))
                         parents_stack.Push(c[0].ToString());
                 }
+
+                if (parents_stack.Count == 0 && available_categories.Count != 0)
+                {
+                    List<string[]> crutch = new List<string[]>();
+                    foreach (string a in available_categories)
+                        crutch.Add(new string[] { a });
+                    parents_stack = new Stack<string>(GetTopParents(crutch));
+                }
             }
 
+        }
+
+        public void ClearTable(string table_name)
+        {
+            ExecuteCommand(string.Format("delete from {0}", table_name));
+            ExecuteCommand(string.Format("ALTER TABLE {0} AUTO_INCREMENT=1", table_name));
         }
 
         public void ShowCatalogTable(string table_name, int number_of_columns, DataGridView dataGridView)
@@ -392,6 +409,52 @@ namespace Catalog
             else
                 AddValuesToCatalogLevelV2(new List<string[]>() { new string[] { "catalog" }, new string[] { "catalog_aggregate" }, new string[] { "catalog_model" } });
             ShowCatalogTable("catalog_level", 4, dataGridView4);
+            UpdateTreeView();
+        }
+
+        public void UpdateTreeView()
+        {
+            TreeNode string_node;
+            string parent_id;
+
+            catalog_level_tree.Nodes.Clear();
+
+            List<string[]> catalog_level_data = ExecuteReader("select * from catalog_level", 4);
+
+            foreach (string[] c in catalog_level_data)
+            {
+                if (c[1].Count() == 0)
+                {
+                    string_node = new TreeNode { Text = c[2], Name = c[0] };
+                    catalog_level_tree.Nodes.Add(string_node);
+                }
+                else
+                {
+                    parent_id = c[1];
+                    foreach (TreeNode tn in catalog_level_tree.Nodes)
+                    {
+                        if (tn.Name == parent_id)
+                        {
+                            tn.Nodes.Add(new TreeNode { Text = c[2], Name = c[0] });
+                            break;
+                        }
+                        else
+                            CheckChildNodes(tn, parent_id, c[2], c[0]);
+                    }
+                    
+                }
+            }
+        }
+
+        public void CheckChildNodes(TreeNode parent, string parent_id, string text, string name)
+        {
+            foreach (TreeNode tn in parent.Nodes)
+            {
+                if (tn.Name == parent_id)
+                    tn.Nodes.Add(new TreeNode { Text = text, Name = name });
+                else
+                    CheckChildNodes(tn, parent_id, text, name);
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
