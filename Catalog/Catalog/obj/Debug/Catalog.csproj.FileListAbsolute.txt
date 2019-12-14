@@ -8,3 +8,13 @@ C:\Users\RedRat\Documents\Work searching\ЕТС Групп\Catalog\Catalog\obj\D
 C:\Users\RedRat\Documents\Work searching\ЕТС Групп\Catalog\Catalog\obj\Debug\Catalog.csproj.CopyComplete
 C:\Users\RedRat\Documents\Work searching\ЕТС Групп\Catalog\Catalog\obj\Debug\Catalog.exe
 C:\Users\RedRat\Documents\Work searching\ЕТС Групп\Catalog\Catalog\obj\Debug\Catalog.pdb
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\bin\Debug\Catalog.exe.config
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\bin\Debug\Catalog.exe
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\bin\Debug\Catalog.pdb
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\obj\Debug\Catalog.csprojAssemblyReference.cache
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\obj\Debug\Catalog.Form1.resources
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\obj\Debug\Catalog.Properties.Resources.resources
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\obj\Debug\Catalog.csproj.GenerateResource.cache
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\obj\Debug\Catalog.csproj.CopyComplete
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\obj\Debug\Catalog.exe
+C:\Users\RedRat\Documents\GitHub\Catalogs\Catalog\Catalog\Catalog\obj\Debug\Catalog.pdb
